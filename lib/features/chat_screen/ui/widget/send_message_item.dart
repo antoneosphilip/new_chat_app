@@ -13,13 +13,13 @@ class MessageItem extends StatelessWidget {
   final GetMessageResponse message;
   final AlignmentGeometry align;
   final Friends? friends;
-
+  final FriendChatModel? friendChatModel;
   const MessageItem({
     super.key,
     required this.message,
     required this.align,
     required,
-    this.friends,
+    this.friends, this.friendChatModel,
   });
 
   @override
@@ -48,7 +48,11 @@ class MessageItem extends StatelessWidget {
                   color: align == Alignment.centerRight
                       ? ColorsManager.mainBurble
                       : Colors.white,
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(align == Alignment.centerRight?0:16.w),
+                      topLeft: Radius.circular(align == Alignment.centerRight?16:0.w),
+                      bottomLeft: Radius.circular(20.r),
+                      bottomRight: Radius.circular(20.r)),
                   border: align == Alignment.centerLeft
                       ? Border.all(color: ColorsManager.mainBurble, width: 2)
                       : Border.all()),
@@ -63,7 +67,7 @@ class MessageItem extends StatelessWidget {
                         color: align == Alignment.centerRight
                             ? Colors.white
                             : ColorsManager.secondBlack),
-                  ),
+                  )
                 ),
               )),
             ),

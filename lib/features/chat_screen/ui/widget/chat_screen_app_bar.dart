@@ -1,3 +1,4 @@
+import 'package:christy/features/home/logic/cubit/friend_list_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -6,13 +7,14 @@ import 'chat_person_name.dart';
 
 class ChatScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Friends friends;
-  const ChatScreenAppBar({Key? key, required this.friends}) : super(key: key);
+  final FriendListCubit friendListCubit;
+  const ChatScreenAppBar({super.key, required this.friends,required this.friendListCubit });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      flexibleSpace: ChatPersonName(friends: friends),
+      flexibleSpace: ChatPersonName(friends: friends,friendListCubit:friendListCubit),
       backgroundColor: Colors.transparent,
       elevation: 0,
     );

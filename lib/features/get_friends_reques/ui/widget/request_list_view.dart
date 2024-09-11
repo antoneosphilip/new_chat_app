@@ -1,5 +1,6 @@
 import 'package:christy/core/theming/styles.dart';
 import 'package:christy/core/widgets/flutter_show_toast.dart';
+import 'package:christy/core/widgets/shimmer.dart';
 import 'package:christy/features/get_friends_reques/logic/cubit/get_friends_request_cubit.dart';
 import 'package:christy/features/get_friends_reques/logic/cubit/get_friends_request_states.dart';
 import 'package:christy/features/get_friends_reques/ui/widget/request_item.dart';
@@ -36,44 +37,28 @@ class RequestListView extends StatelessWidget {
       builder: (BuildContext context, state) {
         final cubit = GetFriendsRequestCubit.get(context);
         if (state is GetFriendsRequestLoadingStates) {
-          return const Center(child: CircularProgressIndicator());
+          return const CustomShimmer();
         } else if (state is GetFriendsRequestSuccessStates ||
             state is AcceptFriendsRequestSuccessStates ||
             state is RejectFriendsRequestSuccessStates) {
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 30.h,
-                ),
-                Text(
-                  "friends requests",
-                  style: TextStyles.font20BlackRegular
-                      .copyWith(color: ColorsManager.bink),
-                ),
-                SizedBox(
-                  height: 20.h,
-                ),
-                ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return RequestItem(
-                          request:
-                              cubit.getFriendsRequestResponse?.requests[index],
-                          cubit: cubit);
-                    },
-                    separatorBuilder: (context, index) {
-                      return SizedBox(
-                        height: 15.h,
-                      );
-                    },
-                    itemCount:
-                        cubit.getFriendsRequestResponse!.requests.length),
-              ],
-            ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 20.h,
+              ),
+              ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return RequestItem(
+                        request:
+                            cubit.getFriendsRequestResponse?.requests[index],
+                        cubit: cubit);
+                  },
+                  itemCount:
+                      cubit.getFriendsRequestResponse!.requests.length),
+            ],
           );
         } else if (state is GetFriendsRequestErrorStates) {
           return Text(state.error.toString());

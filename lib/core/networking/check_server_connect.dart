@@ -6,7 +6,6 @@ class CheckServerConnection {
   static Future<bool> checkServerConnection() async {
     if (!SignalRService.isConnected) {
       try {
-        print("ssssssssssssssssssssssssssssss");
        await SignalRService.initializeConnection();
       } catch (error) {
         return false;

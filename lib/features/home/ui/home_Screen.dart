@@ -31,9 +31,7 @@ class HomeScreen extends StatelessWidget {
                   height: 36.h,
                 ),
                 InkWell(
-                  onTap: () {
-
-                  },
+                  onTap: () {},
                   child: Text(
                     'chats',
                     style: TextStyles.font20BlackRegular

@@ -47,7 +47,7 @@ class SignalRService {
 
   static Future<void> connection({
     required String channelName,
-    required StreamController<Map<String, dynamic>> friendChatController,
+    required StreamController<dynamic> friendChatController,
   }) async {
     print("Setting up connection for channel: $channelName");
 
@@ -71,13 +71,20 @@ class SignalRService {
   }
 
   static void handleReceivedData(
-      dynamic data, StreamController<Map<String, dynamic>> friendChatController) {
+      dynamic data, StreamController<dynamic> friendChatController) {
     try {
       print("Handling received data");
 
       if (data != null) {
+        if(data is String)
+        {
+          print("string");
+          processItem(data, friendChatController);
+
+        }
         if (data is List && data.isNotEmpty) {
           // Handle if data is a List
+
           processItem(data[0], friendChatController);
         } else if (data is Map<String, dynamic>) {
           // Handle single item
@@ -92,13 +99,18 @@ class SignalRService {
   }
 
   static void processItem(dynamic item,
-      StreamController<Map<String, dynamic>> friendChatController) {
+      StreamController<dynamic> friendChatController) {
     try {
       if (item is Map<String, dynamic>) {
         print("Processing item as Map");
         friendChatController.add(item);
         print("Item added to stream");
-      } else {
+      }
+      else if(item is String)
+      {
+        friendChatController.add(item);
+      }
+      else {
         print('Unexpected item format: $item');
       }
     } catch (error) {

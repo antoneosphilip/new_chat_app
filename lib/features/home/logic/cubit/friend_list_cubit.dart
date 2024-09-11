@@ -9,8 +9,18 @@ import 'friend_list_states.dart';
 
 class FriendListCubit extends Cubit<FriendListState> {
   final FriendListRepo _friendListRepo;
-  final StreamController<Map<String, dynamic>> friendChatController = StreamController<Map<String, dynamic>>.broadcast();
-  StreamSubscription<Map<String, dynamic>>? _subscription;
+
+  final StreamController<Map<String, dynamic>> friendChatController =
+  StreamController<Map<String, dynamic>>.broadcast();
+  final StreamController<String> _onlineChatController =
+  StreamController<String>.broadcast();
+  final StreamController<String> _offlineChatController =
+  StreamController<String>.broadcast();
+
+  StreamSubscription<Map<String, dynamic>>? _friendChatSubscription;
+  StreamSubscription<String>? _onlineChatSubscription;
+  StreamSubscription<String>? _offlineChatSubscription;
+
   FriendChatModel? friendChatModel;
 
   FriendListCubit(this._friendListRepo) : super(Initial()) {
@@ -26,59 +36,80 @@ class FriendListCubit extends Cubit<FriendListState> {
     data.when(
       success: (data) async {
         friendChatModel = data;
-        await listenToData();
+        await _listenToData();
+        await _listenToOnline();
+        await _listenToOffline();
         emit(Success());
       },
-      failure: (error) {
-        emit(Error(error.apiErrorModel.title ?? ''));
-      },
+      failure: (error) => emit(Error(error.apiErrorModel.title ?? '')),
     );
   }
 
-  Future<void> listenToData() async {
-    // Pass the StreamController to the SignalRService
+  Future<void> _listenToData() async {
     await SignalRService.connection(
       channelName: 'RecieveMessage',
       friendChatController: friendChatController,
     );
-
-    _subscription = friendChatController.stream.listen(
-          (friendChat) {
-        final latestMessage = LatestMessage.fromJson(friendChat);
-        final friends = friendChatModel?.friends ?? [];
-
-        // Find the friend and update their latest message
-        final friend = friends.firstWhere(
-              (e) => e.userId == latestMessage.senderId,
-        );
-        friend.latestMessage = latestMessage; // Update or add the latest message
-
-        emit(Success());
-      },
-    );
+    _friendChatSubscription = friendChatController.stream.listen(_onNewMessageReceived);
   }
 
-  void updateLastMessage(String text, Friends friends,  id) {
-    if (friends.latestMessage != null) {
-      friends.latestMessage?.text = text;
-    } else {
-      LatestMessage newLatestMessage = LatestMessage(
-        isSent: null,
-        senderId: id,
-        createdAt: DateTime.now().toString(),
-        id: 1,
-        text: text,
-      );
-      friends.latestMessage = newLatestMessage;
+  Future<void> _listenToOnline() async {
+    await SignalRService.connection(
+      channelName: 'hoppedOnline',
+      friendChatController: _onlineChatController,
+    );
+    _onlineChatSubscription = _onlineChatController.stream.listen(_onUserOnline);
+  }
+
+  Future<void> _listenToOffline() async {
+    await SignalRService.connection(
+      channelName: 'wentOffline',
+      friendChatController: _offlineChatController,
+    );
+    _offlineChatSubscription = _offlineChatController.stream.listen(_onUserOffline);
+  }
+
+  void _onNewMessageReceived(Map<String, dynamic> data) {
+    final latestMessage = LatestMessage.fromJson(data);
+    final friend = friendChatModel?.friends?.firstWhere((e) => e.userId == latestMessage.senderId);
+    if (friend != null) {
+      friend.latestMessage = latestMessage;
+      emit(Success());
     }
-    print("Updated Message: ${friends.latestMessage!.text}");
+  }
+
+  void _onUserOnline(String userId) => _updateUserOnlineStatus(userId, true);
+
+  void _onUserOffline(String userId) => _updateUserOnlineStatus(userId, false);
+
+  void _updateUserOnlineStatus(String userId, bool isOnline) {
+    friendChatModel?.friends?.forEach((friend) {
+      if (friend.userId == userId) {
+        friend.isOnline = isOnline;
+        emit(Success());
+      }
+    });
+  }
+
+  void updateLastMessage(String text, Friends friend,  id) {
+    friend.latestMessage ??= LatestMessage(
+      senderId: id,
+      createdAt: DateTime.now().toString(),
+      id: 1,
+    );
+    friend.latestMessage!.text = text;
+    print("Updated Message: ${friend.latestMessage!.text}");
     emit(Success());
   }
 
   @override
   Future<void> close() {
-    _subscription?.cancel();
+    _friendChatSubscription?.cancel();
+    _onlineChatSubscription?.cancel();
+    _offlineChatSubscription?.cancel();
     friendChatController.close();
+    _onlineChatController.close();
+    _offlineChatController.close();
     return super.close();
   }
 }

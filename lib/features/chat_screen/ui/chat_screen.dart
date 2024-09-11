@@ -13,6 +13,7 @@ class ChatScreen extends StatelessWidget {
   final Friends? friends;
   final FriendChatModel? friendChatModel;
   final FriendListCubit friendListCubit;
+
   const ChatScreen(
       {super.key,
       required this.friends,
@@ -22,16 +23,23 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) =>
-          ChatCubit(getIt())..getMessages(chatId: friends!.friendShipId, friendChatStream: friendListCubit.friendChatController),
+      create: (BuildContext context) => ChatCubit(getIt())
+        ..getMessages(
+            chatId: friends!.friendShipId,
+            ),
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: ChatScreenAppBar(
+          friendListCubit: friendListCubit,
           friends: friends!,
         ),
         body: Column(
           children: [
-            Expanded(child: ChatScreenBody(friends: friends!,friendChatModel: friendChatModel!,)),
+            Expanded(
+                child: ChatScreenBody(
+              friends: friends!,
+              friendChatModel: friendChatModel!,
+            )),
             SendMessageContainer(
               friends: friends!,
               friendChatModel: friendChatModel!,

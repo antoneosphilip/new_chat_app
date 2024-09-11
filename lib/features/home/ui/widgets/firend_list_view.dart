@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/widgets/shimmer.dart';
 import '../../logic/cubit/friend_list_cubit.dart';
 import '../../logic/cubit/friend_list_states.dart';
 import 'friend_item.dart';
@@ -17,7 +18,7 @@ class ChatListView extends StatelessWidget {
           current is Success || current is Error || current is Loading,
       builder: (context, state) {
         if (state is Loading) {
-          return const CircularProgressIndicator();
+          return const CustomShimmer();
         } else if (state is Success) {
           return ListView.separated(
             physics: const NeverScrollableScrollPhysics(),

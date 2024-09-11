@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
+
 import 'core/routing/app_router.dart';
 import 'core/routing/routes.dart';
 import 'core/theming/colors.dart';
@@ -47,37 +48,43 @@ class _ChristyAppState extends State<ChristyApp> {
               InternetConnectionCubit()..checkConnection(),
           child: BlocBuilder<InternetConnectionCubit, InternetConnectionState>(
             builder: (BuildContext context, state) {
-              return InternetConnectionCubit.get(context).isConnected? MaterialApp(
-                title: 'Chat App',
-                theme: ThemeData(
-                  primaryColor: ColorsManager.white,
-                  scaffoldBackgroundColor: ColorsManager.white,
-                ),
-                debugShowCheckedModeBanner: false,
-                builder: EasyLoading.init(),
-                onGenerateRoute: widget.appRouter.generateRoute,
-                initialRoute:
-                    isLogin ? Routes.homeBottomNav : Routes.loginScreen, // home:isLogin?HomeScreen(): LoginScreen()
-              ):MaterialApp(
-                theme: ThemeData(
-                  primaryColor: ColorsManager.white,
-                  scaffoldBackgroundColor: ColorsManager.white,
-                ),
-                debugShowCheckedModeBanner: false,
-                builder: (context, child) {
-                  return Scaffold(
-                    body: Center(
-                      child:  Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Lottie.asset('assets/animation/no_connection.json'),  // Add your error animation JSON file here
-                        ],
+              return InternetConnectionCubit.get(context).isConnected
+                  ? MaterialApp(
+                      title: 'Chat App',
+                      theme: ThemeData(
+                        primaryColor: ColorsManager.white,
+                        scaffoldBackgroundColor: ColorsManager.white,
                       ),
-                    ),
-                  );
-                },
-              );
+                      debugShowCheckedModeBanner: false,
+                      builder: EasyLoading.init(),
+                      onGenerateRoute: widget.appRouter.generateRoute,
+                      initialRoute: isLogin
+                          ? Routes.homeBottomNav
+                          : Routes
+                              .loginScreen, // home:isLogin?HomeScreen(): LoginScreen()
+                    )
+                  : MaterialApp(
+                      theme: ThemeData(
+                        primaryColor: ColorsManager.white,
+                        scaffoldBackgroundColor: ColorsManager.white,
+                      ),
+                      debugShowCheckedModeBanner: false,
+                      builder: (context, child) {
+                        return Scaffold(
+                          body: Center(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Lottie.asset(
+                                    'assets/animation/no_connection.json'),
+                                // Add your error animation JSON file here
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
             },
           ),
         ));
